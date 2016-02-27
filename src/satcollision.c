@@ -29,6 +29,7 @@
 #include <math.h>       // Standard math library.  
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> //memcpy
 
 Texture2D CreateWhitePixelTexture ()
 {
@@ -55,29 +56,25 @@ Vector2 GetNormal(Vector2 a, Vector2 b, bool left)
     return normal;
 }
 
-void RotatePoints (Vector2 *points, Vector2 pivot, float angle)
-{
-    int lenght = sizeof(points)/sizeof(Vector2);
-    
+void RotatePoints (Vector2 *points, int lenght, Vector2 pivot, float angle)
+{   
     for (int i=0; i<lenght; i++) Vector2Rotate(&points[i], pivot, angle);
 }
 
-Value2 GetProjectedMinMax (Vector2 *points, Vector2 normal)
+Value2 GetProjectedMinMax (Vector2 *points, int lenght, Vector2 normal)
 {
-    int lenght;
     float current, min, max;
     
-    lenght = sizeof(points)/sizeof(Vector2);
     current = Vector2DotProduct(points[0], normal);
     min = current;
-    max = min;
+    max = current;
     
     for (int i=1; i<lenght; i++)
     {
         current = Vector2DotProduct(points[i], normal);
         
-        if (current < min) current = min;
-        if (current > max) current = max;
+        if (current < min) min = current;
+        if (current > max) max = current;
     }
     
     return (Value2){min, max};
@@ -85,7 +82,7 @@ Value2 GetProjectedMinMax (Vector2 *points, Vector2 normal)
 
 bool MinMaxCollide (Value2 a, Value2 b)
 {
-    if (a.b < b.a || b.b < a.a) return false; // If max < min, then, there is no collision
+    if (a.a > b.b || b.a > a.b) return false; // If max < min, then, there is no collision
     return true;
 }
 
@@ -104,7 +101,7 @@ void InitSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation)
     box->points[2] = Vector2Add(box->position, Vector2Product(Vector2One(), size));
     box->points[3] = Vector2Sub(box->position, Vector2Product((Vector2){1, -1}, size));
     
-    if (box->rotation != 0) RotatePoints(box->points, box->position, box->rotation);
+    if (box->rotation != 0) RotatePoints(box->points, 4, box->position, box->rotation);
 }
 
 void InitSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation)
@@ -121,7 +118,7 @@ void InitSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation)
     tri->points[1] = Vector2Add(tri->position, Vector2Product((Vector2){0, -1}, size));
     tri->points[2] = Vector2Add(tri->position, Vector2Product((Vector2){1, 1}, size));
     
-    if (tri->rotation != 0) RotatePoints(tri->points, tri->position, tri->rotation);
+    if (tri->rotation != 0) RotatePoints(tri->points, 3, tri->position, tri->rotation);
 }
 
 void InitSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides, float rotation)
@@ -137,7 +134,7 @@ void InitSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides
         Vector2Rotate(&poly->points[0], poly->position, (360/sides)*i);
     }
     
-    if (poly->rotation != 0) RotatePoints(poly->points, poly->position, poly->rotation);
+    if (poly->rotation != 0) RotatePoints(poly->points, poly->sides, poly->position, poly->rotation);
 }
 
 void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation)
@@ -157,7 +154,7 @@ void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation)
         box->points[2] = Vector2Add(box->position, Vector2Product(Vector2One(), size));
         box->points[3] = Vector2Sub(box->position, Vector2Product((Vector2){1, -1}, size));
         
-        if (box->rotation != 0)RotatePoints(box->points, box->position, box->rotation);
+        if (box->rotation != 0) RotatePoints(box->points, 4, box->position, box->rotation);
     }
 }
 
@@ -177,7 +174,7 @@ void UpdateSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation)
         tri->points[1] = Vector2Add(tri->position, Vector2Product((Vector2){0, -1}, size));
         tri->points[2] = Vector2Add(tri->position, Vector2Product((Vector2){1, 1}, size));
         
-        if (tri->rotation != 0) RotatePoints(tri->points, tri->position, tri->rotation);
+        if (tri->rotation != 0) RotatePoints(tri->points, 3, tri->position, tri->rotation);
     }
 }
 
@@ -218,33 +215,28 @@ void UpdateAASATTriPosition (SATTri *tri, Vector2 position)
     }
 }
 
-bool PolysCollide (Vector2 *p1Points, Vector2 *p2Points)
+bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2Lenght)
 {
-    int p1Lenght;
     Vector2 normal;
-    
-    p1Lenght = sizeof(p1Points)/sizeof(Vector2);
     
     for (int i=0; i<p1Lenght; i++)
     {
         normal = GetNormal(p1Points[i], p1Points[i+1], true);
-        if (!MinMaxCollide(GetProjectedMinMax(p1Points, normal), GetProjectedMinMax(p2Points, normal))) return false;
+
+        if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, normal), GetProjectedMinMax(p2Points, p2Lenght, normal))) return false;
     }
     // Check first-last point normal
     normal = GetNormal(p1Points[0], p1Points[p1Lenght-1], true);
-    if (!MinMaxCollide(GetProjectedMinMax(p1Points, normal), GetProjectedMinMax(p2Points, normal))) return false;
-    
-    int p2Lenght;
-    p2Lenght = sizeof(p2Points)/sizeof(Vector2);
+    if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, normal), GetProjectedMinMax(p2Points, p2Lenght, normal))) return false;
     
     for (int i=0; i<p2Lenght; i++)
     {
         normal = GetNormal(p2Points[i], p2Points[i+1], true);
-        if (!MinMaxCollide(GetProjectedMinMax(p1Points, normal), GetProjectedMinMax(p2Points, normal))) return false;
+        if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, normal), GetProjectedMinMax(p2Points, p2Lenght, normal))) return false;
     }
     // Check first-last point normal
     normal = GetNormal(p2Points[0], p2Points[p2Lenght-1], true);
-    if (!MinMaxCollide(GetProjectedMinMax(p1Points, normal), GetProjectedMinMax(p2Points, normal))) return false;
+    if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, normal), GetProjectedMinMax(p2Points, p2Lenght, normal))) return false;
     
     return true;
 }

@@ -79,8 +79,8 @@ typedef struct Value2
 Texture2D CreateWhitePixelTexture ();
 Vector2 GetNormal(Vector2 a, Vector2 b, bool left);
 //void GetNormals (Vector2 *normals, Vector2 *points, bool left);
-void RotatePoints (Vector2 *points, Vector2 pivot, float angle);
-Value2 GetProjectedMinMax (Vector2 *points, Vector2 normal);
+void RotatePoints (Vector2 *points, int lenght, Vector2 pivot, float angle);
+Value2 GetProjectedMinMax (Vector2 *points, int lenght, Vector2 normal);
 bool MinMaxCollide (Value2 a, Value2 b);
 void InitSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation);
 void InitSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation);
@@ -89,7 +89,7 @@ void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation);
 void UpdateSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation);
 void UpdateAASATBoxPosition (SATBox *box, Vector2 position);
 void UpdateAASATTriPosition (SATTri *tri, Vector2 position);
-bool PolysCollide (Vector2 *p1Points, Vector2 *p2Points);
+bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2Lenght);
 /*
 void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation);
 void UpdateStaticAASATBox (SATBox *box, Vector2 position);
