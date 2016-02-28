@@ -54,7 +54,7 @@ typedef struct SATTri // Is supposed to be a ("x") symetric triangle
 typedef struct SATRegPoly
 {
     Vector2 position; // Should be in the middle of points. 
-    Vector2 *points;
+    Vector2 *points; // free points before finishing the program!!! ->  free(SATRegPoly.points);
     float radius;
     int sides;
     float rotation;

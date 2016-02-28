@@ -132,11 +132,14 @@ void InitSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides
     poly->radius = radius;
     poly->sides = sides;
     poly->rotation = rotation;
+    poly->points = malloc(sizeof(Vector2)*sides);
     
     for (int i=0; i<sides; i++)
     {
-        poly->points[i] = Vector2FloatProduct(Vector2Up(), poly->radius);
-        Vector2Rotate(&poly->points[0], poly->position, (360/sides)*i);
+        poly->points[i] = Vector2FloatProduct((Vector2){0, -1}, poly->radius);
+        Vector2Rotate(&poly->points[i], Vector2Zero(), (360/sides)*i);
+        
+        poly->points[i] = Vector2Add(poly->points[i], poly->position);
     }
     
     if (poly->rotation != 0) RotatePoints(poly->points, poly->sides, poly->position, poly->rotation);
