@@ -24,7 +24,6 @@
 */
 
 #include "satcollision.h"
-
 #include "c2dmath.h"
 #include <math.h>       // Standard math library.  
 #include <stdio.h>
@@ -54,6 +53,12 @@ Vector2 GetNormal(Vector2 a, Vector2 b, bool left)
     else normal.y *= -1;
     
     return normal;
+}
+
+void SetNormals (Vector2 *points, Vector2 *normals, int lenght, bool left)
+{   
+    for (int i=0; i<lenght-1; i++) normals[i] = GetNormal(points[i], points[i+1], left);
+    normals[lenght-1] = GetNormal(points[0], points[lenght-1], left);
 }
 
 void RotatePoints (Vector2 *points, int lenght, Vector2 pivot, float angle)
@@ -114,9 +119,9 @@ void InitSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation)
     Vector2Scale(&size, 0.5f);
     
     // Set tri corners position
-    tri->points[0] = Vector2Add(tri->position, Vector2Product((Vector2){-1, 1}, size));
-    tri->points[1] = Vector2Add(tri->position, Vector2Product((Vector2){0, -1}, size));
-    tri->points[2] = Vector2Add(tri->position, Vector2Product((Vector2){1, 1}, size));
+    tri->points[0] = Vector2Add(tri->position, Vector2Product((Vector2){0, -1}, size));
+    tri->points[1] = Vector2Add(tri->position, Vector2Product((Vector2){1, 1}, size));
+    tri->points[2] = Vector2Add(tri->position, Vector2Product((Vector2){-1, 1}, size));
     
     if (tri->rotation != 0) RotatePoints(tri->points, 3, tri->position, tri->rotation);
 }
@@ -241,4 +246,29 @@ bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2
     return true;
 }
 
+bool SATPolysNCollide (Vector2 *p1Points, Vector2 *p1Normals, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght)
+{
+    for (int i=0; i<p1Lenght; i++) if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p1Normals[i]), GetProjectedMinMax(p2Points, p2Lenght, p1Normals[i]))) return false;
+    for (int i=0; i<p2Lenght; i++) if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p2Normals[i]), GetProjectedMinMax(p2Points, p2Lenght, p2Normals[i]))) return false;
+    
+    return true;
+}
 
+bool SATPolyPolyNCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght)
+{
+    Vector2 p1Normal;
+    
+    for (int i=0; i<p1Lenght; i++)
+    {
+        p1Normal = GetNormal(p1Points[i], p1Points[i+1], true);
+
+        if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p1Normal), GetProjectedMinMax(p2Points, p2Lenght, p1Normal))) return false;
+    }
+    // Check first-last point normal
+    p1Normal = GetNormal(p1Points[0], p1Points[p1Lenght-1], true);
+    if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p1Normal), GetProjectedMinMax(p2Points, p2Lenght, p1Normal))) return false;
+    
+    for (int i=0; i<p2Lenght; i++) if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p2Normals[i]), GetProjectedMinMax(p2Points, p2Lenght, p2Normals[i]))) return false;
+    
+    return true;
+}

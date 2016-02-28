@@ -78,7 +78,7 @@ typedef struct Value2
 // ----------------------------
 Texture2D CreateWhitePixelTexture ();
 Vector2 GetNormal(Vector2 a, Vector2 b, bool left);
-//void GetNormals (Vector2 *normals, Vector2 *points, bool left);
+void SetNormals (Vector2 *points, Vector2 *normals, int lenght, bool left);
 void RotatePoints (Vector2 *points, int lenght, Vector2 pivot, float angle);
 Value2 GetProjectedMinMax (Vector2 *points, int lenght, Vector2 normal);
 bool MinMaxCollide (Value2 a, Value2 b);
@@ -90,28 +90,10 @@ void UpdateSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation);
 void UpdateAASATBoxPosition (SATBox *box, Vector2 position);
 void UpdateAASATTriPosition (SATTri *tri, Vector2 position);
 bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2Lenght);
-/*
-void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation);
-void UpdateStaticAASATBox (SATBox *box, Vector2 position);
-void InitSATTri(SATTri *tri, Vector2 position, Vector2 size, float rotation);
-void UpdateSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation);
-void UpdateStaticAASATTri (SATTri *tri, Vector2 position);
-void InitSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides, float rotation);
-void UpdateSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides, float rotation);
-bool CheckMinMaxCollision (Value2 a, Value2 b);
-bool SATBoxesCollide(SATBox b1, SATBox b2);
-bool SATBoxPolyCollide (SATBox b, Vector2 *pPoints);
-bool SATBoxPolyNCollide(SATBox b, Vector2 *pPoints, Vector2 *pNormals);
-bool SATPolyPolyCollide (Vector2 *p1Points, Vector2 *p2Points);
-bool SATPolyNPolyNCollide (Vector2 *p1Points, Vector2 *p1Normals, Vector2 *p2Points, Vector2 *p2Normals);
-bool SATPolyPolyNCollide (Vector2 *p1Points, Vector2 *p2Points, Vector2 *p2Normals);
-
-void DrawSATBox (SATBox box, Texture2D texture, Color color, float alpha);
-// Box - Circle
-// Poly - Circle
-// Normals - Circle
+bool SATPolysNCollide (Vector2 *p1Points, Vector2 *p1Normals, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght);
+bool SATPolyPolyNCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght);
 // ----------------------------
-*/
+
 
 #ifdef __cplusplus
 }
