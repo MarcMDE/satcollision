@@ -134,10 +134,12 @@ void InitSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, int sides
     poly->rotation = rotation;
     poly->points = malloc(sizeof(Vector2)*sides);
     
-    for (int i=0; i<sides; i++)
+    float angle = 360.0f/(float)poly->sides;
+    
+    for (int i=0; i<poly->sides; i++)
     {
         poly->points[i] = Vector2FloatProduct((Vector2){0, -1}, poly->radius);
-        Vector2Rotate(&poly->points[i], Vector2Zero(), (360/sides)*i);
+        Vector2Rotate(&poly->points[i], Vector2Zero(), angle*(float)i);
         
         poly->points[i] = Vector2Add(poly->points[i], poly->position);
     }
@@ -223,6 +225,28 @@ void UpdateAASATTriPosition (SATTri *tri, Vector2 position)
     }
 }
 
+void UpdateSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, float rotation)
+{
+    if (poly->position.x != position.x || poly->position.y != position.y || poly->radius != radius || poly->rotation != rotation)
+    {
+        poly->position = position;
+        poly->radius = radius;
+        poly->rotation = rotation;
+        
+        float angle = 360.0f/(float)poly->sides;
+        
+        for (int i=0; i<poly->sides; i++)
+        {
+            poly->points[i] = Vector2FloatProduct((Vector2){0, -1}, poly->radius);
+            Vector2Rotate(&poly->points[i], Vector2Zero(), angle*(float)i);
+            
+            poly->points[i] = Vector2Add(poly->points[i], poly->position);
+        }
+        
+        if (poly->rotation != 0) RotatePoints(poly->points, poly->sides, poly->position, poly->rotation);
+    }
+}
+
 bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2Lenght)
 {
     Vector2 normal;
@@ -273,5 +297,27 @@ bool SATPolyPolyNCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, Ve
     
     for (int i=0; i<p2Lenght; i++) if (!MinMaxCollide(GetProjectedMinMax(p1Points, p1Lenght, p2Normals[i]), GetProjectedMinMax(p2Points, p2Lenght, p2Normals[i]))) return false;
     
+    return true;
+}
+
+bool SATPolyCircCollide (Vector2 *pPoints, Vector2 pPosition, int pLenght, Vector2 cPosition, float cRadius)
+{
+    Vector2 polyToCircle, polyToCircleNormalized;
+    float current, max, polyToCircleMagnitude;
+    
+    polyToCircle = Vector2Sub(cPosition, pPosition);
+    polyToCircleNormalized = polyToCircle;
+    Vector2Normalize(&polyToCircleNormalized);
+    polyToCircleMagnitude = Vector2Lenght(polyToCircle);
+    
+    max = Vector2DotProduct(Vector2Sub(pPosition, pPosition), polyToCircleNormalized);
+    
+    for (int i=0; i<pLenght; i++)
+    {
+        current = Vector2DotProduct(Vector2Sub(pPoints[i], pPosition), polyToCircleNormalized);
+        if (current > max) max = current;
+    }   
+    
+    if (polyToCircleMagnitude - max - cRadius > 0 && polyToCircleMagnitude > 0) return false;
     return true;
 }

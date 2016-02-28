@@ -89,9 +89,11 @@ void UpdateSATBox (SATBox *box, Vector2 position, Vector2 size, float rotation);
 void UpdateSATTri (SATTri *tri, Vector2 position, Vector2 size, float rotation);
 void UpdateAASATBoxPosition (SATBox *box, Vector2 position);
 void UpdateAASATTriPosition (SATTri *tri, Vector2 position);
+void UpdateSATRegPoly (SATRegPoly *poly, Vector2 position, float radius, float rotation);
 bool SATPolysCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, int p2Lenght);
 bool SATPolysNCollide (Vector2 *p1Points, Vector2 *p1Normals, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght);
 bool SATPolyPolyNCollide (Vector2 *p1Points, int p1Lenght, Vector2 *p2Points, Vector2 *p2Normals, int p2Lenght);
+bool SATPolyCircCollide (Vector2 *pPoints, Vector2 pPosition, int pLenght, Vector2 cPosition, float cRadius);
 // ----------------------------
 
 
