@@ -28,7 +28,6 @@
 #include <math.h>       // Standard math library.  
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> //memcpy
 
 Texture2D CreateWhitePixelTexture ()
 {

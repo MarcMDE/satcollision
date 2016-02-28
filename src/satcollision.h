@@ -64,6 +64,7 @@ typedef struct SATIrrPoly
 {
     Vector2 position; // Should be in the middle of points. 
     Vector2 *points;
+    int sides;
     float rotation;
 }SATIrrPoly;
 
